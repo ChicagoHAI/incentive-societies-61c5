@@ -1,0 +1,5 @@
+{
+  "repeats": 200,
+  "trials_per_repeat": 20000,
+  "seed": 99
+}

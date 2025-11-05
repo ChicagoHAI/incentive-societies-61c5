@@ -31,20 +31,20 @@ Success criteria:
 ## Proposed Methodology
 
 ### Approach
-Use synthetic repeated multi-agent signaling games to model agents sharing probabilistic claims about hidden world states. Implement parameterized agent strategies (truthful, overconfident, underconfident, adaptive best-response) and compare payoffs under different environment designs (baseline vs. sanction/audit vs. safety-augmented). Analytical equilibrium checks will be complemented by empirical reinforcement-learning or best-response simulations.
+Use a synthetic repeated multi-agent signaling game to model agents sharing probabilistic claims about hidden binary events. Implement parameterized agent strategies (truthful, overconfident, underconfident, sanction-aware) and compare payoffs under different environment designs (baseline vs. sanction/audit vs. safety-augmented). Favor Monte Carlo evaluation of fixed strategies and light-weight grid search for myopic deviations instead of heavy reinforcement learning to satisfy compute and time constraints.
 
 ### Experimental Steps
-1. **Formalize Game Environment**: Define per-round payoff structure combining proper scoring rules, communication costs, and sanction penalties (Monte Carlo simulated for tractability).
-2. **Baseline Analysis**: Compute expected utilities for candidate strategy profiles without sanctions; verify deviations outperform truthful reports.
-3. **Sanction Mechanism Evaluation**: Introduce audit sampling and long-run penalty accumulation; run dynamic programming / iterative best-response to assess equilibrium stability.
-4. **Safety Constraint Layer**: Add abstention threshold and tool activation constraints; evaluate with same agents to gauge impact on truthfulness and safety metrics.
-5. **Sensitivity & Robustness**: Sweep audit frequency, penalty magnitude, and abstention bandwidth to map parameter regimes where truthfulness is stable.
-6. **Statistical Testing & Visualization**: Aggregate simulation results, compute means/variances, conduct paired tests, and visualize payoff landscapes.
+1. **Formalize Game Environment**: Specify latent probability generation, reporting protocol, decision-dependent bonuses/costs, and sanction penalties; implement as vectorized numpy simulation for efficiency.
+2. **Baseline Analysis**: Monte Carlo expected utilities for candidate strategy profiles without sanctions; verify deviations outperform truthful reports due to decision bonus.
+3. **Sanction Mechanism Evaluation**: Introduce audit sampling and cumulative penalties with discounting; recompute utilities and estimate best deviation via grid search over report inflation parameters.
+4. **Safety Constraint Layer**: Add abstention threshold and safety penalties inspired by predictive safety networks; evaluate same strategies to gauge impact on truthfulness and unsafe tool activations.
+5. **Sensitivity & Robustness**: Sweep audit frequency, penalty magnitude, and abstention bandwidth on a coarse grid to map regimes where truthfulness is stable.
+6. **Statistical Testing & Visualization**: Aggregate simulation results, compute confidence intervals via bootstrapping, conduct paired tests, and visualize payoff landscapes.
 
 ### Baselines
-- **No Sanction**: Proper scoring-rule reward only (log score / Brier score). Tests whether truthfulness holds without penalties.
-- **Static Penalty**: Immediate penalty for detected lies without cumulative tracking (to see if long-run penalties matter).
-- **Random Strategy**: Agents reporting random beliefs to confirm evaluation pipeline.
+- **No Sanction**: Proper scoring-rule reward plus decision bonus but no penalties. Demonstrates incentive to inflate reports.
+- **Static Penalty**: Immediate one-off penalty when an audit catches misreporting; highlights importance of long-run penalty accumulation.
+- **Random Strategy**: Agents reporting random beliefs to confirm evaluation pipeline and provide a lower bound.
 
 ### Evaluation Metrics
 - **Truthfulness Error**: Mean absolute deviation between reported and true probabilities; Brier score difference relative to truthful reporting.
@@ -53,7 +53,7 @@ Use synthetic repeated multi-agent signaling games to model agents sharing proba
 - **Safety Violations**: Count/rate of abstention breaches or unsafe actions.
 
 ### Statistical Analysis Plan
-- Perform Monte Carlo simulations (≥10k episodes per condition) to estimate means and standard errors.
+- Perform Monte Carlo simulations (≥50k episodes per condition) to estimate means and standard errors.
 - Use paired t-tests or Wilcoxon signed-rank tests (if non-normal) comparing truthful vs. deviating utilities under each mechanism.
 - Apply bootstrap confidence intervals (95%) for key metrics.
 - Conduct regression/sensitivity analysis to relate audit frequency to utility gap.
@@ -75,7 +75,7 @@ Use synthetic repeated multi-agent signaling games to model agents sharing proba
 
 ## Potential Challenges
 - **Analytical complexity**: Proving subgame perfection may be intractable; rely on empirical best-response approximations and document limitation.
-- **Simulation stability**: Ensuring convergence of adaptive strategies (e.g., Q-learning) on CPU might be slow; plan for simpler best-response enumeration if needed.
+- **Sampling variance**: Monte Carlo estimates may be noisy for rare audits; will boost episode count or use variance reduction when necessary.
 - **Parameter explosion**: Large sweep space could exceed time budget; prioritize most informative ranges (e.g., audit probability ∈ {0, 0.1, 0.3, 0.5}).
 - **Safety layer calibration**: Setting abstention penalties too high could trivialize agent behavior; will iteratively adjust while monitoring metrics.
 

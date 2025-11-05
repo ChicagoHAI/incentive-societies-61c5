@@ -1,0 +1,16 @@
+{
+  "seed": 42,
+  "variants": [
+    "baseline",
+    "sanction",
+    "sanction_safety"
+  ],
+  "bias_grid_shape": [
+    20,
+    9
+  ],
+  "profile_shape": [
+    6,
+    10
+  ]
+}
